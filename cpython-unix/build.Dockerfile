@@ -12,6 +12,8 @@
 # Various other build tools are needed for various building.
 RUN ulimit -n 10000 && apt-get install \
     bzip2 \
+    ca-certificates \
+    curl \
     file \
     libc6-dev \
     libc6-dev:i386 \

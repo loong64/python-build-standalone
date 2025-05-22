@@ -35,6 +35,8 @@ RUN apt-get update
 # Host building.
 RUN apt-get install \
     bzip2 \
+    ca-certificates \
+    curl \
     gcc \
     g++ \
     libc6-dev \

@@ -380,10 +380,10 @@ DOWNLOADS = {
         "version": "1.20.1",
     },
     "xcb-proto": {
-        "url": "https://www.x.org/archive/individual/proto/xcb-proto-1.14.1.tar.gz",
-        "size": 194674,
-        "sha256": "85cd21e9d9fbc341d0dbf11eace98d55d7db89fda724b0e598855fcddf0944fd",
-        "version": "1.14.1",
+        "url": "https://www.x.org/archive/individual/proto/xcb-proto-1.15.2.tar.gz",
+        "size": 200158,
+        "sha256": "6b1ed9cd7cf35e37913eeecca37e5b85b14903002942b3e332f321335c27a8eb",
+        "version": "1.15.2",
     },
     # Newer versions from at least 2023 have build failures for reasons we haven't
     # fully investigated.
