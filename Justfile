@@ -32,7 +32,7 @@ release-download-distributions token commit:
 
 # Upload release artifacts to a GitHub release.
 release-upload-distributions token datetime tag:
-  cargo run --release -- upload-release-distributions --token {{token}} --datetime {{datetime}} --tag {{tag}} --dist dist
+  cargo run --release -- upload-release-distributions --token {{token}} --datetime {{datetime}} --tag {{tag}} --dist dist --ignore-missing
 
 # "Upload" release artifacts to a GitHub release in dry-run mode (skip upload).
 release-upload-distributions-dry-run token datetime tag:
@@ -51,8 +51,8 @@ release-set-latest-release tag:
   {
     "version": 1,
     "tag": "{{tag}}",
-    "release_url": "https://github.com/astral-sh/python-build-standalone/releases/tag/{{tag}}",
-    "asset_url_prefix": "https://github.com/astral-sh/python-build-standalone/releases/download/{{tag}}"
+    "release_url": "https://github.com/loong64/python-build-standalone/releases/tag/{{tag}}",
+    "asset_url_prefix": "https://github.com/loong64/python-build-standalone/releases/download/{{tag}}"
   }
   EOF
 
@@ -74,7 +74,7 @@ release-run token commit tag:
 
   rm -rf dist
   just release-download-distributions {{token}} {{commit}}
-  datetime=$(ls dist/cpython-3.10.*-x86_64-unknown-linux-gnu-install_only-*.tar.gz  | awk -F- '{print $8}' | awk -F. '{print $1}')
+  datetime=$(ls dist/cpython-3.10.*-loongarch64-unknown-linux-gnu-install_only-*.tar.gz  | awk -F- '{print $8}' | awk -F. '{print $1}')
   just release-upload-distributions {{token}} ${datetime} {{tag}}
   just release-set-latest-release {{tag}}
 
@@ -85,7 +85,7 @@ release-dry-run token commit tag:
 
   rm -rf dist
   just release-download-distributions {{token}} {{commit}}
-  datetime=$(ls dist/cpython-3.10.*-x86_64-unknown-linux-gnu-install_only-*.tar.gz  | awk -F- '{print $8}' | awk -F. '{print $1}')
+  datetime=$(ls dist/cpython-3.10.*-loongarch64-unknown-linux-gnu-install_only-*.tar.gz  | awk -F- '{print $8}' | awk -F. '{print $1}')
   just release-upload-distributions-dry-run {{token}} ${datetime} {{tag}}
 
 _download-stats mode:

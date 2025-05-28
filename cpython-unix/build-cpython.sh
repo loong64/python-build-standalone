@@ -58,6 +58,14 @@ cat Makefile.extra
 
 pushd Python-${PYTHON_VERSION}
 
+if [ "${PYBUILD_PLATFORM}" != "macos" ]; then
+    case "${PYTHON_MAJMIN_VERSION}" in
+        3.9|3.10|3.11)
+            patch -p1 -i ${ROOT}/patch-loongarch-cross.patch
+            ;;
+    esac
+fi
+
 # configure doesn't support cross-compiling on Apple. Teach it.
 if [[ "${PYBUILD_PLATFORM}" = macos* ]]; then
     if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]; then
@@ -1068,6 +1076,9 @@ armv7-unknown-linux-gnueabi)
 armv7-unknown-linux-gnueabihf)
     PYTHON_ARCH="arm-linux-gnueabihf"
     ;;
+loongarch64-unknown-linux-gnu)
+    PYTHON_ARCH="loongarch64-linux-gnu"
+    ;;
 mips-unknown-linux-gnu)
     PYTHON_ARCH="mips-linux-gnu"
     ;;
@@ -1225,9 +1236,9 @@ if [ -d "${TOOLS_PATH}/deps/lib/tcl8" ]; then
         cp -av $source ${ROOT}/out/python/install/lib/
     done
 
-    if [[ "${PYBUILD_PLATFORM}" != macos* ]]; then
-        cp -av ${TOOLS_PATH}/deps/lib/Tix8.4.3 ${ROOT}/out/python/install/lib/
-    fi
+    # if [[ "${PYBUILD_PLATFORM}" != macos* ]]; then
+    #     cp -av ${TOOLS_PATH}/deps/lib/Tix8.4.3 ${ROOT}/out/python/install/lib/
+    # fi
 fi
 
 # Copy the terminfo database if present.
