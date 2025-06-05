@@ -549,7 +549,8 @@ def python_build_info(
         # See https://github.com/astral-sh/python-build-standalone/issues/410
         linux_allowed_system_libraries.add("atomic")
     riscv = target_triple.split("-")[0] in {"riscv64"}
-    if riscv:
+    loongarch = target_triple.split("-")[0] in {"loongarch64"}
+    if riscv or loongarch:
         # On older GCC versions, RISC-V sub-word atomic operations require a
         # helper function found in libatomic. To facilitate this, GCC <15 adds
         # "-latomic" to the definition of "-pthread". We think it's generally
@@ -930,7 +931,7 @@ def build_cpython(
             "tk8.6",
         ]
 
-        if "-apple" not in target_triple:
+        if not all(s in target_triple for s in ("-apple", "loongarch64-")): 
             python_info["tcl_library_paths"].append("Tix8.4.3")
 
         if "-apple" in target_triple:

@@ -15,6 +15,10 @@ export PKG_CONFIG_PATH=/tools/deps/share/pkgconfig
 tar -xf xorgproto-${XORGPROTO_VERSION}.tar.gz
 pushd xorgproto-${XORGPROTO_VERSION}
 
+rm -f config.guess.sub config.sub
+curl -sSL -o config.guess https://github.com/cgitmirror/config/raw/refs/heads/master/config.guess
+curl -sSL -o config.sub https://github.com/cgitmirror/config/raw/refs/heads/master/config.sub
+
 CFLAGS="${EXTRA_TARGET_CFLAGS} -fPIC" CPPFLAGS="${EXTRA_TARGET_CFLAGS} -fPIC" LDFLAGS="${EXTRA_TARGET_LDFLAGS}" ./configure \
     --build=${BUILD_TRIPLE} \
     --host=${TARGET_TRIPLE} \

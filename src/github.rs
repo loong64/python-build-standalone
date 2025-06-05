@@ -4,7 +4,7 @@
 
 use {
     crate::release::{
-        bootstrap_llvm, produce_install_only, produce_install_only_stripped, RELEASE_TRIPLES,
+        bootstrap_llvm, produce_install_only, RELEASE_TRIPLES,
     },
     anyhow::{anyhow, Result},
     bytes::Bytes,
@@ -143,9 +143,10 @@ pub async fn command_fetch_release_distributions(args: &ArgMatches) -> Result<()
         .filter_map(|wf| {
             if matches!(
                 wf.path.as_str(),
-                ".github/workflows/macos.yml"
-                    | ".github/workflows/linux.yml"
-                    | ".github/workflows/windows.yml"
+                ".github/workflows/linux.yml"
+                // ".github/workflows/macos.yml"
+                //    | ".github/workflows/linux.yml"
+                //    | ".github/workflows/windows.yml"
             ) {
                 workflow_names.insert(wf.id, wf.name);
 
@@ -313,25 +314,6 @@ pub async fn command_fetch_release_distributions(args: &ArgMatches) -> Result<()
             );
 
             let dest_path = produce_install_only(path)?;
-
-            println!(
-                "prepared {} for release",
-                dest_path
-                    .file_name()
-                    .expect("should have file name")
-                    .to_string_lossy()
-            );
-
-            // Create the `install_only_stripped` archive.
-            println!(
-                "producing install_only_stripped archive from {}",
-                dest_path
-                    .file_name()
-                    .expect("should have file name")
-                    .to_string_lossy()
-            );
-
-            let dest_path = produce_install_only_stripped(&dest_path, &llvm_dir)?;
 
             println!(
                 "prepared {} for release",
