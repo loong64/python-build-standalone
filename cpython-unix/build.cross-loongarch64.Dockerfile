@@ -1,5 +1,5 @@
 # Debian Trixie.
-FROM debian@sha256:653dfb9f86c3782e8369d5f7d29bb8faba1f4bff9025db46e807fa4c22903671
+FROM debian@sha256:5e64db7e29879fbb479ab2c6324656c9c0e489423e4885ed7e2f22c5b58a7a9b
 MAINTAINER Gregory Szorc <gregory.szorc@gmail.com>
 
 RUN groupadd -g 1000 build && \
@@ -18,10 +18,10 @@ CMD ["/bin/bash", "--login"]
 WORKDIR '/build'
 
 RUN for s in debian_trixie debian_trixie-updates; do \
-      echo "deb http://snapshot.debian.org/archive/${s%_*}/20250515T202920Z/ ${s#*_} main"; \
+      echo "deb http://snapshot.debian.org/archive/${s%_*}/20240812T212427Z/ ${s#*_} main"; \
     done > /etc/apt/sources.list && \
     for s in debian-security_trixie-security/updates; do \
-      echo "deb http://snapshot.debian.org/archive/${s%_*}/20250515T175729Z/ ${s#*_} main"; \
+      echo "deb http://snapshot.debian.org/archive/${s%_*}/20240813T064849Z/ ${s#*_} main"; \
     done >> /etc/apt/sources.list && \
     ( echo 'quiet "true";'; \
       echo 'APT::Get::Assume-Yes "true";'; \
@@ -57,8 +57,8 @@ RUN apt-get install \
     libc6-dev-loong64-cross
 
 RUN cd /tmp && \
-    curl -LO https://snapshot.debian.org/archive/debian-ports/20250515T194251Z/pool-loong64/main/libx/libxcrypt/libcrypt-dev_4.4.38-1_loong64.deb && \
-    curl -LO https://snapshot.debian.org/archive/debian-ports/20250515T194251Z/pool-loong64/main/libx/libxcrypt/libcrypt1_4.4.38-1_loong64.deb && \
-    dpkg -x libcrypt-dev_4.4.38-1_loong64.deb / && \
-    dpkg -x libcrypt1_4.4.38-1_loong64.deb / && \
+    curl -LO https://snapshot.debian.org/archive/debian-ports/20240812T192057Z/pool-loong64/main/libx/libxcrypt/libcrypt-dev_4.4.36-4_loong64.deb && \
+    curl -LO https://snapshot.debian.org/archive/debian-ports/20240812T192057Z/pool-loong64/main/libx/libxcrypt/libcrypt1_4.4.36-4_loong64.deb && \
+    dpkg -x libcrypt-dev_4.4.36-4_loong64.deb / && \
+    dpkg -x libcrypt1_4.4.36-4_loong64.deb / && \
     rm -f /tmp/*.deb
