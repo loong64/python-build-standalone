@@ -61,7 +61,7 @@ fn main_impl() -> Result<()> {
                 Arg::new("organization")
                     .long("org")
                     .action(ArgAction::Set)
-                    .default_value("astral-sh")
+                    .default_value("loong64")
                     .help("GitHub organization"),
             )
             .arg(
@@ -151,7 +151,7 @@ fn main_impl() -> Result<()> {
                 Arg::new("organization")
                     .long("org")
                     .action(ArgAction::Set)
-                    .default_value("astral-sh")
+                    .default_value("loong64")
                     .help("GitHub organization"),
             )
             .arg(
@@ -199,19 +199,6 @@ fn main_impl() -> Result<()> {
         Some(("convert-install-only", args)) => {
             for path in args.get_many::<PathBuf>("path").unwrap() {
                 let dest_path = release::produce_install_only(path)?;
-                println!("wrote {}", dest_path.display());
-            }
-
-            Ok(())
-        }
-        Some(("convert-install-only-stripped", args)) => {
-            let llvm_dir = tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build()
-                .unwrap()
-                .block_on(release::bootstrap_llvm())?;
-            for path in args.get_many::<PathBuf>("path").unwrap() {
-                let dest_path = release::produce_install_only_stripped(path, &llvm_dir)?;
                 println!("wrote {}", dest_path.display());
             }
 
