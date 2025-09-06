@@ -1,5 +1,5 @@
-# Debian Jessie.
-FROM debian@sha256:32ad5050caffb2c7e969dac873bce2c370015c2256ff984b70c1c08b3a2816a0
+# Debian Trixie.
+FROM debian@sha256:5e64db7e29879fbb479ab2c6324656c9c0e489423e4885ed7e2f22c5b58a7a9b
 LABEL org.opencontainers.image.authors="Gregory Szorc <gregory.szorc@gmail.com>"
 
 RUN groupadd -g 1000 build && \
@@ -17,17 +17,19 @@ ENV HOME=/build \
 CMD ["/bin/bash", "--login"]
 WORKDIR '/build'
 
-# Jessie's signing keys expired in late 2022. So need to add [trusted=yes] to force trust.
-# Jessie stopped publishing snapshots in March 2023.
-RUN for s in debian_jessie debian_jessie-updates debian-security_jessie/updates; do \
-      echo "deb [trusted=yes] http://snapshot.debian.org/archive/${s%_*}/20230322T152120Z/ ${s#*_} main"; \
+RUN for s in debian_trixie debian_trixie-updates; do \
+      echo "deb http://snapshot.debian.org/archive/${s%_*}/20240812T212427Z/ ${s#*_} main"; \
     done > /etc/apt/sources.list && \
+    for s in debian-security_trixie-security/updates; do \
+      echo "deb http://snapshot.debian.org/archive/${s%_*}/20240813T064849Z/ ${s#*_} main"; \
+    done >> /etc/apt/sources.list && \
     ( echo 'quiet "true";'; \
       echo 'APT::Get::Assume-Yes "true";'; \
       echo 'APT::Install-Recommends "false";'; \
       echo 'Acquire::Check-Valid-Until "false";'; \
       echo 'Acquire::Retries "5";'; \
-    ) > /etc/apt/apt.conf.d/99cpython-portable
+    ) > /etc/apt/apt.conf.d/99cpython-portable && \
+    rm -f /etc/apt/sources.list.d/*
 
 # apt iterates all available file descriptors up to rlim_max and calls
 # fcntl(fd, F_SETFD, FD_CLOEXEC). This can result in millions of system calls
