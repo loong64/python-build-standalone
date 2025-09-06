@@ -17,8 +17,8 @@ pushd xorgproto-${XORGPROTO_VERSION}
 
 if [[ "${TARGET_TRIPLE}" = loongarch64* ]]; then
     rm -f config.guess.sub config.sub
-    curl -sSL -o config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess'
-    curl -sSL -o config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub'
+    curl -sSL -o config.guess https://github.com/cgitmirror/config/raw/refs/heads/master/config.guess
+    curl -sSL -o config.sub https://github.com/cgitmirror/config/raw/refs/heads/master/config.sub
 fi
 
 CFLAGS="${EXTRA_TARGET_CFLAGS} -fPIC" CPPFLAGS="${EXTRA_TARGET_CFLAGS} -fPIC" LDFLAGS="${EXTRA_TARGET_LDFLAGS}" ./configure \
