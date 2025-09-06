@@ -179,6 +179,19 @@ pub static RELEASE_TRIPLES: Lazy<BTreeMap<&'static str, TripleRelease>> = Lazy::
     );
 
     h.insert(
+        "loongarch64-unknown-linux-gnu",
+        TripleRelease {
+            suffixes: linux_suffixes_nopgo.clone(),
+            install_only_suffix: "lto",
+            python_version_requirement: Some(VersionSpecifier::from_str(">=3.9").unwrap()),
+            conditional_suffixes: vec![ConditionalSuffixes {
+                python_version_requirement: VersionSpecifier::from_str(">=3.13").unwrap(),
+                suffixes: linux_suffixes_nopgo_freethreaded.clone(),
+            }],
+        },
+    );
+
+    h.insert(
         "ppc64le-unknown-linux-gnu",
         TripleRelease {
             suffixes: linux_suffixes_nopgo.clone(),
@@ -617,7 +630,7 @@ static LLVM_URL: Lazy<Url> = Lazy::new(|| {
             panic!("unsupported macOS architecture");
         }
     } else if cfg!(target_os = "linux") {
-        Url::parse("https://github.com/indygreg/toolchain-tools/releases/download/toolchain-bootstrap%2F20251029/llvm-20.1.4+20251029-gnu_only-x86_64-unknown-linux-gnu.tar.zst").unwrap()
+        Url::parse("https://github.com/indygreg/toolchain-tools/releases/download/toolchain-bootstrap%2F20251029/llvm-21.1.4+20251029-gnu_only-x86_64-unknown-linux-gnu.tar.zst").unwrap()
     } else {
         panic!("unsupported platform");
     }
