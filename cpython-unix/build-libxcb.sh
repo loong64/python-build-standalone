@@ -15,8 +15,8 @@ pushd libxcb-${LIBXCB_VERSION}
 
 if [[ "${TARGET_TRIPLE}" = loongarch64* ]]; then
     rm -f build-aux/config.guess build-aux/config.sub
-    curl -sSL -o build-aux/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess'
-    curl -sSL -o build-aux/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub'
+    curl -sSL -o build-aux/config.guess https://github.com/cgitmirror/config/raw/refs/heads/master/config.guess
+    curl -sSL -o build-aux/config.sub https://github.com/cgitmirror/config/raw/refs/heads/master/config.sub
 fi
 
 if [ "${CC}" = "musl-clang" ]; then
