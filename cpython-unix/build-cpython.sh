@@ -324,12 +324,11 @@ if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_14}" ]; then
     patch -p1 -i ${ROOT}/patch-python-relative-build-details.patch
 fi
 
-# Mark the COLORS global variable static to prevent it from
-# conflicting with the symbol in the ncurses library.
-# Fix has been merged upstream, drop in next 3.15 release
-# https://github.com/python/cpython/pull/143846
+# Mark _Py_jit_entry as extern in _testiternalcapi/interpreter.c to avoid a duplicate symbols.
+# The symbol is not actually used in the module, a better solution should be found, see:
+# https://github.com/python/cpython/issues/144712
 if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_15}" ]; then
-    patch -p1 -i ${ROOT}/patch-optimizer-static-colors.patch
+    patch -p1 -i ${ROOT}/patch-testinternalcapi-interpreter-extern.patch
 fi
 
 # Most bits look at CFLAGS. But setup.py only looks at CPPFLAGS.
