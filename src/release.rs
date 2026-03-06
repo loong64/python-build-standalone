@@ -187,7 +187,6 @@ pub static RELEASE_TRIPLES: Lazy<BTreeMap<&'static str, TripleRelease>> = Lazy::
             conditional_suffixes: vec![ConditionalSuffixes {
                 python_version_requirement: VersionSpecifier::from_str(">=3.13").unwrap(),
                 suffixes: linux_suffixes_nopgo_freethreaded.clone(),
-                install_only_suffix: linux_install_only_suffixes_nopgo_freethreaded,
             }],
         },
     );
