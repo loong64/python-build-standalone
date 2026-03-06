@@ -44,3 +44,4 @@ url = "2.5.7"
 version-compare = "0.2.1"
 zip = "6.0.0"
 zstd = "0.13.3"
+rustls = { version = "0.23.22", features = ["aws_lc_rs"] }

@@ -298,6 +298,10 @@ fn main_impl() -> Result<()> {
 }
 
 fn main() {
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .expect("Failed to install default crypto provider");
+
     let exit_code = match main_impl() {
         Ok(()) => 0,
         Err(err) => {
