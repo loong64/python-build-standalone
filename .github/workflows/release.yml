@@ -24,7 +24,7 @@ jobs:
   release-gate:
     name: release-gate
     runs-on: ubuntu-latest
-    environment: release-gate
+    # environment: release-gate
     steps:
       - run: echo "Release approved"
 
@@ -33,7 +33,7 @@ jobs:
     name: Record release deployment
     needs: release-gate
     runs-on: ubuntu-latest
-    environment: release
+    # environment: release
     steps:
       - run: echo "Release deployment approved"
 
@@ -42,8 +42,8 @@ jobs:
     needs: release-deployment
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    runs-on: depot-ubuntu-24.04-8
-    environment: release
+    runs-on: ubuntu-latest
+    # environment: release
 
     permissions:
       contents: write
@@ -100,6 +100,7 @@ jobs:
             dist/*.tar.zst
 
       - name: Publish to Astral mirror
+        if: ${{ github.repository == 'astral-sh/python-build-standalone' }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.MIRROR_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.MIRROR_R2_SECRET_ACCESS_KEY }}
@@ -143,7 +144,7 @@ jobs:
 
       - name: Get versions token
         id: token
-        if: ${{ github.event.inputs.dry-run == 'false' }}
+        if: ${{ github.repository == 'astral-sh/python-build-standalone' }}
         uses: astral-sh/github-actions/simple-token-service@eb81cf4d13127c3f9539f621c17e4c65327636c8
         with:
           exchange-url: ${{ secrets.RELEASES_STS_API_URL }}/exchange
@@ -157,10 +158,10 @@ jobs:
         if: ${{ github.event.inputs.dry-run == 'false' }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: astral-sh/versions
+          repository: loong64/versions
           ref: main
           path: astral-versions
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ secrets.ASTRAL_VERSIONS_PAT }}
           persist-credentials: false
 
       - name: Update versions
@@ -184,7 +185,7 @@ jobs:
         if: ${{ github.event.inputs.dry-run == 'false' }}
         env:
           TAG: ${{ github.event.inputs.tag }}
-          GH_TOKEN: ${{ steps.token.outputs.token }}
+          GH_TOKEN: ${{ secrets.ASTRAL_VERSIONS_PAT }}
         working-directory: astral-versions
         run: |
           pull_request_title="Update python-build-standalone versions for $TAG"
@@ -203,7 +204,7 @@ jobs:
       - name: Merge Pull Request
         if: ${{ github.event.inputs.dry-run == 'false' }}
         env:
-          GH_TOKEN: ${{ steps.token.outputs.token }}
+          GH_TOKEN: ${{ secrets.ASTRAL_VERSIONS_PAT }}
         working-directory: astral-versions
         run: |
           # Wait for PR to be created before merging
@@ -213,7 +214,7 @@ jobs:
 
   publish-docs:
     needs: release
-    if: ${{ github.event.inputs.dry-run == 'false' }}
+    if: ${{ github.repository == 'astral-sh/python-build-standalone' }}
     uses: $/.github/workflows/publish-docs.yml
     permissions:
       contents: read
