@@ -214,6 +214,16 @@ jobs:
       fail-fast: false
     name: ${{ matrix.target_triple }} / ${{ matrix.python }} / ${{ matrix.build_options }}
     steps: &build_steps
+      - uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
@@ -333,18 +343,3 @@ jobs:
           MATRIX_RUN: ${{ matrix.run }}
           MATRIX_LIBC: ${{ matrix.libc }}
 
-  build-1:
-    needs:
-      - generate-matrix
-      - crate-build
-      - image
-    # Permissions used for actions/attest-build-provenance
-    permissions:
-      id-token: write
-      attestations: write
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.python-build-matrix-1) }}
-      fail-fast: false
-    name: ${{ matrix.target_triple }} / ${{ matrix.python }} / ${{ matrix.build_options }}
-    steps: *build_steps
