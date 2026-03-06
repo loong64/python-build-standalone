@@ -58,7 +58,7 @@ jobs:
 
       - name: "Clone versions repo"
         if: inputs.dry-run != true
-        run: git clone https://${{ secrets.ASTRAL_VERSIONS_PAT }}@github.com/astral-sh/versions.git astral-versions
+        run: git clone https://${{ secrets.ASTRAL_VERSIONS_PAT }}@github.com/loong64/versions.git astral-versions
 
       - name: "Update versions"
         if: inputs.dry-run != true
