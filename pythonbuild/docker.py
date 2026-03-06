@@ -93,8 +93,11 @@ def get_image(
             return image_id
 
         else:
+            dockerfile_path = source_dir / f"{name}.Dockerfile"
+            with open(dockerfile_path, "rb") as f:
+                image_data = f.read()
             return build_docker_image(
-                client, str(source_dir).encode(), image_dir, name, host_platform
+                client, image_data, image_dir, name, host_platform
             )
 
 
