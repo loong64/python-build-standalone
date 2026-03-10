@@ -139,12 +139,6 @@ if [ -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_10}" ]; then
   patch -p1 -i "${ROOT}/patch-makesetup-deduplicate-objs.patch"
 fi
 
-# testembed links against Tcl/Tk and libpython which already includes Tcl/Tk leading duplicate
-# symbols and warnings from objc (which then causes failures in `test_embed` during PGO).
-if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]; then
-  patch -p1 -i "${ROOT}/patch-make-testembed-nolink-tcltk.patch"
-fi
-
 # The default build rule for the macOS dylib doesn't pick up libraries
 # from modules / makesetup. So patch it accordingly.
 if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]; then
@@ -158,10 +152,12 @@ fi
 # executable. This behavior is kinda suspect on all platforms, as it could be adding
 # library dependencies that shouldn't need to be there.
 if [[ "${PYBUILD_PLATFORM}" = macos* ]]; then
-    if [ "${PYTHON_MAJMIN_VERSION}" = "3.10" ]; then
-        patch -p1 -i "${ROOT}/patch-python-link-modules-3.10.patch"
-    else
+    if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_15}" ]; then
+        patch -p1 -i "${ROOT}/patch-python-link-modules-3.15.patch"
+    elif [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_11}" ]; then
         patch -p1 -i "${ROOT}/patch-python-link-modules-3.11.patch"
+    elif [ "${PYTHON_MAJMIN_VERSION}" = "3.10" ]; then
+        patch -p1 -i "${ROOT}/patch-python-link-modules-3.10.patch"
     fi
 fi
 
