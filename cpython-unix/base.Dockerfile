@@ -1,5 +1,5 @@
 # Debian Trixie.
-FROM debian@sha256:5e64db7e29879fbb479ab2c6324656c9c0e489423e4885ed7e2f22c5b58a7a9b
+FROM debian@sha256:a9114963cf3cd27fdae799d3c987758a26709515db3673ce85e2c4befd88199e
 LABEL org.opencontainers.image.authors="Gregory Szorc <gregory.szorc@gmail.com>"
 
 RUN groupadd -g 1000 build && \
