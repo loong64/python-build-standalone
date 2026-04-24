@@ -1139,6 +1139,7 @@ def main():
             "libffi-3.3",
             "libffi",
             "libpthread-stubs",
+            "libxcrypt",
             "m4",
             "mpdecimal",
             "ncurses",
