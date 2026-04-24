@@ -176,6 +176,15 @@ DOWNLOADS = {
         "licenses": ["MIT"],
         "license_file": "LICENSE.libxcb.txt",
     },
+    "libxcrypt": {
+        "url": "https://github.com/besser82/libxcrypt/releases/download/v4.5.1/libxcrypt-4.5.1.tar.xz",
+        "size": 670308,
+        "sha256": "e9b46a62397c15372935f6a75dc3929c62161f2620be7b7f57f03d69102c1a86",
+        "version": "4.5.1",
+        "library_names": ["crypt"],
+        "licenses": ["LGPL-2.1"],
+        "license_file": "LICENSE.libxcrypt.txt",
+    },
     # Remember to update LLVM_URL in src/release.rs whenever upgrading.
     "llvm-aarch64-linux": {
         "url": "https://github.com/indygreg/toolchain-tools/releases/download/toolchain-bootstrap%2F20260410/llvm-22.1.3+20260410-gnu_only-aarch64-unknown-linux-gnu.tar.zst",
