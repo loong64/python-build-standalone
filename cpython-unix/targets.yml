@@ -323,6 +323,7 @@ loongarch64-unknown-linux-gnu:
     - binutils
     - bzip2
     - expat
+    - libxcrypt
     - libedit
     - libffi
     - libX11
