@@ -56,10 +56,3 @@ RUN apt-get install \
     g++-loongarch64-linux-gnu \
     gcc-loongarch64-linux-gnu \
     libc6-dev-loong64-cross
-
-RUN cd /tmp && \
-    curl -LO https://snapshot.debian.org/archive/debian-ports/20240812T192057Z/pool-loong64/main/libx/libxcrypt/libcrypt-dev_4.4.36-4_loong64.deb && \
-    curl -LO https://snapshot.debian.org/archive/debian-ports/20240812T192057Z/pool-loong64/main/libx/libxcrypt/libcrypt1_4.4.36-4_loong64.deb && \
-    dpkg -x libcrypt-dev_4.4.36-4_loong64.deb / && \
-    dpkg -x libcrypt1_4.4.36-4_loong64.deb / && \
-    rm -f /tmp/*.deb
