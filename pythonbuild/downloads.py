@@ -176,6 +176,15 @@ DOWNLOADS = {
         "licenses": ["MIT"],
         "license_file": "LICENSE.libxcb.txt",
     },
+    "libxcrypt": {
+        "url": "https://github.com/besser82/libxcrypt/releases/download/v4.5.1/libxcrypt-4.5.1.tar.xz",
+        "size": 670308,
+        "sha256": "e9b46a62397c15372935f6a75dc3929c62161f2620be7b7f57f03d69102c1a86",
+        "version": "4.5.1",
+        "library_names": ["crypt"],
+        "licenses": ["LGPL-2.1"],
+        "license_file": "LICENSE.libxcrypt.txt",
+    },
     # Pre-sanitized Linux UAPI headers from Debian 13 backports. This does not
     # change the glibc headers or libraries used by selected targets.
     "linux-uapi": {
