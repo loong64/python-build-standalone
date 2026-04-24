@@ -1185,6 +1185,7 @@ def main():
             "expat",
             "libffi",
             "libpthread-stubs",
+            "libxcrypt",
             "linux-uapi",
             "m4",
             "mpdecimal",
