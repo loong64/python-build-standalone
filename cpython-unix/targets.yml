@@ -276,12 +276,14 @@ loongarch64-unknown-linux-gnu:
   target_ldflags:
     # Hardening
     - '-Wl,-z,noexecstack'
+    - '-Wl,-z,max-page-size=0x10000'
   needs:
     - autoconf
     - bdb
     - binutils
     - bzip2
     - expat
+    - libxcrypt
     - libedit
     - libffi
     - libX11

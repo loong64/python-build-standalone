@@ -162,6 +162,9 @@ LIBXCB_DEPENDS = \
 $(OUTDIR)/libxcb-$(LIBXCB_VERSION)-$(PACKAGE_SUFFIX).tar: $(LIBXCB_DEPENDS)
 	$(RUN_BUILD) --docker-image $(DOCKER_IMAGE_BUILD) --python-host-version $(PYBUILD_PYTHON_VERSION) libxcb
 
+$(OUTDIR)/libxcrypt-$(LIBXCRYPT_VERSION)-$(PACKAGE_SUFFIX).tar: $(PYTHON_DEP_DEPENDS) $(HERE)/build-libxcrypt.sh
+	$(RUN_BUILD) --docker-image $(DOCKER_IMAGE_BUILD) libxcrypt
+
 $(OUTDIR)/m4-$(M4_VERSION)-$(PACKAGE_SUFFIX).tar: $(PYTHON_DEP_DEPENDS) $(HERE)/build-m4.sh
 	$(RUN_BUILD) --docker-image $(DOCKER_IMAGE_BUILD) m4
 
@@ -255,6 +258,7 @@ PYTHON_DEPENDS_$(1) := \
     $$(if $$(NEED_LIBEDIT),$$(OUTDIR)/libedit-$$(LIBEDIT_VERSION)-$$(PACKAGE_SUFFIX).tar) \
     $$(if $$(NEED_LIBFFI_3_3),$$(OUTDIR)/libffi-3.3-$$(LIBFFI_3.3_VERSION)-$$(PACKAGE_SUFFIX).tar) \
     $$(if $$(NEED_LIBFFI),$$(OUTDIR)/libffi-$$(LIBFFI_VERSION)-$$(PACKAGE_SUFFIX).tar) \
+	$$(if $$(NEED_LIBXCRYPT),$$(OUTDIR)/libxcrypt-$$(LIBXCRYPT_VERSION)-$$(PACKAGE_SUFFIX).tar) \
     $$(if $$(NEED_m4),$$(OUTDIR)/m4-$$(M4_VERSION)-$$(PACKAGE_SUFFIX).tar) \
     $$(if $$(NEED_MPDECIMAL),$$(OUTDIR)/mpdecimal-$$(MPDECIMAL_VERSION)-$$(PACKAGE_SUFFIX).tar) \
     $$(if $$(NEED_NCURSES),$$(OUTDIR)/ncurses-$$(NCURSES_VERSION)-$$(PACKAGE_SUFFIX).tar) \
