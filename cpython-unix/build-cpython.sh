@@ -1355,6 +1355,13 @@ if [ -d "${TOOLS_PATH}/deps/lib/tcl9" ]; then
     )
 fi
 
+# Prune the tk demos which are > 1 MB and not used
+rm -rf "${ROOT}/out/python/install/lib/tk9.0/demos"
+
+# Prune the tcl/tk translations
+rm -rf "${ROOT}/out/python/install/lib/tcl9.0/msgs"
+rm -rf "${ROOT}/out/python/install/lib/tk9.0/msgs"
+
 # Copy the terminfo database if present.
 if [ -d "${TOOLS_PATH}/deps/usr/share/terminfo" ]; then
   cp -av "${TOOLS_PATH}/deps/usr/share/terminfo" "${ROOT}/out/python/install/share/"
