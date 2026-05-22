@@ -340,6 +340,18 @@ class TestPythonInterpreter(unittest.TestCase):
         with self.subTest(msg="weird argv[0]"):
             assertPythonWorks(sys.executable, argv0="/dev/null")
 
+    @unittest.skipUnless(sys.platform == "linux", "Linux-specific socket constant")
+    # TODO(jjh) remove when musl builds use a sysroot
+    @unittest.skipIf(
+        os.environ["TARGET_TRIPLE"].endswith("-musl"),
+        "kernel headers not available in musl",
+    )
+    def test_socket_af_vsock(self):
+        import socket
+
+        self.assertTrue(hasattr(socket, "AF_VSOCK"))
+        self.assertEqual(socket.AF_VSOCK, 40)
+
     @unittest.skipUnless(sys.platform == "linux", "Linux-specific prctl")
     @unittest.skipIf(
         "static" in os.environ["BUILD_OPTIONS"],
