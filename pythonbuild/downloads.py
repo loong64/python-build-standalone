@@ -93,10 +93,10 @@ DOWNLOADS = {
         "python_tag": "cp314",
     },
     "cpython-3.15": {
-        "url": "https://www.python.org/ftp/python/3.15.0/Python-3.15.0b1.tar.xz",
-        "size": 35178032,
-        "sha256": "d4d52ccfa1d727ef5235fbb7d70fa1dbacf10b8b3760db622875da05acbe437c",
-        "version": "3.15.0b1",
+        "url": "https://www.python.org/ftp/python/3.15.0/Python-3.15.0b2.tar.xz",
+        "size": 35381676,
+        "sha256": "d14f474ab679e90bc734b02ff58447b6ec99a821af61d6ff0c1da0f86e341a71",
+        "version": "3.15.0b2",
         "licenses": ["Python-2.0", "CNRI-Python"],
         "license_file": "LICENSE.cpython.txt",
         "python_tag": "cp315",
@@ -344,7 +344,14 @@ DOWNLOADS = {
         "licenses": ["TCL"],
         "license_file": "LICENSE.tcl.txt",
     },
-    "tk-windows-bin": {
+    "tk-windows-bin-903": {
+        "url": "https://github.com/python/cpython-bin-deps/archive/2f788ebecac8d4bc3c7fa982b55a6c6923aa55fb.tar.gz",
+        "size": 18527780,
+        "sha256": "ac7e489d1fdabb0dbb69896aa8d191b5a87d053ce306fdffa51bbd77b94dbafc",
+        "version": "9.0.3",
+        "git_commit": "2f788ebecac8d4bc3c7fa982b55a6c6923aa55fb",
+    },
+    "tk-windows-bin-8614": {
         "url": "https://github.com/python/cpython-bin-deps/archive/c624cc881bd0e5071dec9de4b120cbe9985d8c14.tar.gz",
         "size": 9497943,
         "sha256": "9b8e77d55f40ceaedd140ccca0daa804f0d43346d5abfcead9b547b5590f82f8",

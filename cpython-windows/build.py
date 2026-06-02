@@ -311,30 +311,6 @@ def static_replace_in_file(p: pathlib.Path, search, replace):
         fh.write(data)
 
 
-def apply_source_patch(cpython_source_path: pathlib.Path, patch_path: pathlib.Path):
-    with patch_path.open("rb") as fh:
-        patch = fh.read().replace(b"\r\n", b"\n")
-
-    with tempfile.NamedTemporaryFile("wb", delete=False) as fh:
-        fh.write(patch)
-        normalized_patch = pathlib.Path(fh.name)
-
-    try:
-        subprocess.run(
-            [
-                "git.exe",
-                "-C",
-                str(cpython_source_path),
-                "apply",
-                "--whitespace=nowarn",
-                str(normalized_patch),
-            ],
-            check=True,
-        )
-    finally:
-        normalized_patch.unlink()
-
-
 OPENSSL_PROPS_REMOVE_RULES_LEGACY = b"""
   <ItemGroup>
     <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).dll" />
@@ -396,8 +372,10 @@ def hack_props(
 
     mpdecimal_version = DOWNLOADS["mpdecimal"]["version"]
 
-    if meets_python_minimum_version(python_version, "3.14") or arch == "arm64":
-        tcltk_commit = DOWNLOADS["tk-windows-bin"]["git_commit"]
+    if meets_python_minimum_version(python_version, "3.15"):
+        tcltk_commit = DOWNLOADS["tk-windows-bin-903"]["git_commit"]
+    elif meets_python_minimum_version(python_version, "3.14") or arch == "arm64":
+        tcltk_commit = DOWNLOADS["tk-windows-bin-8614"]["git_commit"]
     else:
         tcltk_commit = DOWNLOADS["tk-windows-bin-8612"]["git_commit"]
 
@@ -1395,15 +1373,17 @@ def build_cpython(
     setuptools_wheel = download_entry("setuptools", BUILD)
     pip_wheel = download_entry("pip", BUILD)
 
-    # On CPython 3.14+, we use the latest tcl/tk version which has additional
-    # runtime dependencies, so we are conservative and use the old version
-    # elsewhere. The old version isn't built for arm64, so we use the new
-    # version there too
-    tk_bin_entry = (
-        "tk-windows-bin"
-        if meets_python_minimum_version(python_version, "3.14") or arch == "arm64"
-        else "tk-windows-bin-8612"
-    )
+    # We use a prebuild tcl/tk from the upstream CPython project.
+    # Tcl/tk 8.6.14+ has an additional runtime dependency. We are conservative and
+    # use an old version prior to CPython 3.14. The older tck/tk release
+    # is not available for arm64 so we use a newer release there as well.
+    # On CPython 3.14+ we match the version included in the Python.org release.
+    if meets_python_minimum_version(python_version, "3.15"):
+        tk_bin_entry = "tk-windows-bin-903"
+    elif meets_python_minimum_version(python_version, "3.14") or arch == "arm64":
+        tk_bin_entry = "tk-windows-bin-8614"
+    else:
+        tk_bin_entry = "tk-windows-bin-8612"
     tk_bin_archive = download_entry(
         tk_bin_entry, BUILD, local_name="tk-windows-bin.tar.gz"
     )
@@ -1509,7 +1489,7 @@ def build_cpython(
             shutil.copyfile(source, dest)
 
         # Delete the tk nmake helper, it's not needed and links msvc
-        if tk_bin_entry == "tk-windows-bin":
+        if tk_bin_entry in ("tk-windows-bin-8614", "tk-windows-bin-903"):
             tcltk_commit: str = DOWNLOADS[tk_bin_entry]["git_commit"]
             tcltk_path = td / ("cpython-bin-deps-%s" % tcltk_commit)
             (
@@ -1522,12 +1502,6 @@ def build_cpython(
 
         cpython_source_path = td / ("Python-%s" % python_version)
         pcbuild_path = cpython_source_path / "PCbuild"
-
-        if python_version.startswith("3.15."):
-            apply_source_patch(
-                cpython_source_path,
-                SUPPORT / "patch-site-reentrant-startup-files-3.15.patch",
-            )
 
         out_dir = td / "out"
 
