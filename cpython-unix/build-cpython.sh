@@ -742,6 +742,9 @@ autoconf
 # 3.12 and earlier)
 CFLAGS_JIT="${CFLAGS}"
 
+# JIT stencils should not inherit target-wide stack hardening flags.
+CFLAGS_JIT+=" -fno-stack-protector -fno-stack-clash-protection"
+
 # In 3.14+, the JIT compiler on x86-64 Linux uses a model that conflicts with `-fPIC`, so strip it
 # from the flags. See:
 # - https://github.com/python/cpython/issues/135690
@@ -755,6 +758,14 @@ CFLAGS=$CFLAGS CPPFLAGS=$CFLAGS CFLAGS_JIT=$CFLAGS_JIT LDFLAGS=$LDFLAGS \
 
 # Supplement produced Makefile with our modifications.
 cat ../Makefile.extra >> Makefile
+
+# Debian's PPC64LE GCC 6 defaults to PIE but selects the non-PIE startup object unless -pie is
+# passed explicitly. Add it only to LINKFORSHARED, which CPython uses when linking executables.
+# See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81170.
+# TODO(jjh)Remove when the ppc64le toolchain changes
+if [[ "${TARGET_TRIPLE}" = "ppc64le-unknown-linux-gnu" ]]; then
+    printf '\nLINKFORSHARED += -pie\n' >> Makefile
+fi
 
 make -j "${NUM_CPUS}"
 make -j "${NUM_CPUS}" sharedinstall DESTDIR="${ROOT}/out/python"

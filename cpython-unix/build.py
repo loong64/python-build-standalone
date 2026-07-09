@@ -208,6 +208,11 @@ def add_target_env(env, build_platform, target_triple, build_env, build_options)
     else:
         raise Exception("unhandled build platform: %s" % build_platform)
 
+    if "debug" in build_options and "-linux-" in target_triple:
+        # Fortification requires optimization and is ineffective with debug's -O0. Keep this last
+        # so it overrides any configured fortification level.
+        extra_target_cflags.append("-U_FORTIFY_SOURCE")
+
     env["EXTRA_HOST_CFLAGS"] = " ".join(extra_host_cflags)
     env["EXTRA_HOST_LDFLAGS"] = " ".join(extra_host_ldflags)
     env["EXTRA_TARGET_CFLAGS"] = " ".join(extra_target_cflags)
