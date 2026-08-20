@@ -255,6 +255,8 @@ def derive_setup_local(
 ):
     """Derive the content of the Modules/Setup.local file."""
 
+    use_setup_stdlib = meets_python_minimum_version(python_version, "3.12")
+
     # The first part of this function validates that our extension modules YAML
     # based metadata is in sync with the various files declaring extension
     # modules in the Python distribution.
@@ -343,6 +345,12 @@ def derive_setup_local(
         except KeyError:
             setup_bootstrap_in = []
 
+        if use_setup_stdlib:
+            ifh = tf.extractfile(f"Python-{python_version}/Modules/Setup.stdlib.in")
+            setup_stdlib_in = ifh.readlines()
+        else:
+            setup_stdlib_in = []
+
         ifh = tf.extractfile("Python-%s/Modules/config.c.in" % python_version)
         config_c_in = ifh.read()
 
@@ -353,6 +361,31 @@ def derive_setup_local(
 
     RE_VARIABLE = re.compile(rb"^[a-zA-Z_]+\s*=")
     RE_EXTENSION_MODULE = re.compile(rb"^([a-z_]+)\s.*[a-zA-Z/_-]+\.c\b")
+    RE_STDLIB_EXTENSION_MODULE = re.compile(
+        rb"^@MODULE_[A-Z0-9_]+_TRUE@([a-z0-9_]+\s+.*)$"
+    )
+
+    setup_stdlib_lines = {}
+    setup_stdlib_linkage = {}
+    # CPython 3.12+ is configured with MODULE_BUILDTYPE=static.
+    setup_stdlib_section = "static"
+
+    for line in setup_stdlib_in:
+        line = line.rstrip()
+
+        if line == b"*shared*":
+            setup_stdlib_section = "shared"
+            continue
+        elif line == b"*static*":
+            setup_stdlib_section = "static"
+            continue
+
+        if m := RE_STDLIB_EXTENSION_MODULE.match(line):
+            line = m.group(1)
+            name = line.split()[0].decode("ascii")
+            dist_modules.add(name)
+            setup_stdlib_lines[name] = line
+            setup_stdlib_linkage[name] = setup_stdlib_section
 
     # Setup.bootstrap.in has a simple format.
     for line in setup_bootstrap_in:
@@ -460,10 +493,11 @@ def derive_setup_local(
             % ", ".join(sorted(extra))
         )
 
-    # And with verification out of way, now we generate a Setup.local file
-    # from our metadata. The verification above ensured that our metadata
-    # agrees fully with the distribution's knowledge of extensions. So we can
-    # treat our metadata as canonical.
+    # And with verification out of way, now we generate a Setup.local file.
+    # Python 3.12+ builds extensions from Setup.stdlib using configure-derived
+    # compiler and linker flags. Setup.local only disables modules or overrides
+    # linkage that differs from Setup.stdlib; older versions still use the
+    # YAML-derived compilation rules for every extension.
 
     RE_DEFINE = re.compile(rb"-D[^=]+=[^\s]+")
 
@@ -540,7 +574,10 @@ def derive_setup_local(
             enabled_extensions[name]["setup_line"] = setup_enabled_lines[name]
             continue
 
-        log(f"extension {name} being configured via YAML metadata")
+        if use_setup_stdlib and name in setup_stdlib_lines:
+            log(f"extension {name} being configured via Modules/Setup.stdlib")
+        else:
+            log(f"extension {name} being configured via YAML metadata")
 
         line = name
 
@@ -667,9 +704,10 @@ def derive_setup_local(
         # around this by detecting the syntax we'd like to support and move the
         # variable defines to a Makefile supplement that overrides variables for
         # specific targets.
-        for m in RE_DEFINE.finditer(parsed["line"]):
-            for obj_path in sorted(parsed["posix_obj_paths"]):
-                extra_cflags.setdefault(bytes(obj_path), []).append(m.group(0))
+        if not use_setup_stdlib:
+            for m in RE_DEFINE.finditer(parsed["line"]):
+                for obj_path in sorted(parsed["posix_obj_paths"]):
+                    extra_cflags.setdefault(bytes(obj_path), []).append(m.group(0))
 
         line = RE_DEFINE.sub(b"", line)
 
@@ -679,8 +717,22 @@ def derive_setup_local(
                 "makesetup: %s" % line.decode("utf-8")
             )
 
-        section_lines[section].append(line)
+        # The YAML-derived line is still used to describe packaged object files
+        # and dependency libraries in PYTHON.json, even when compilation is
+        # driven by Setup.stdlib.
         enabled_extensions[name]["setup_line"] = line
+
+        if not use_setup_stdlib:
+            section_lines[section].append(line)
+        elif section != setup_stdlib_linkage.get(name, "static"):
+            if name not in setup_stdlib_lines:
+                raise Exception(
+                    f"{section} extension {name} has no Modules/Setup.stdlib.in entry"
+                )
+
+            # Override Setup.stdlib's linkage while inheriting the
+            # MODULE_<name>_CFLAGS/LDFLAGS values produced by configure.
+            section_lines[section].append(setup_stdlib_lines[name])
 
     dest_lines = []
 
