@@ -744,14 +744,17 @@ def hack_project_files(
         b'<Projects2 Include="python_uwp.vcxproj;pythonw_uwp.vcxproj" Condition="$(IncludeUwp)" />',
         b"",
     )
-    static_replace_in_file(
-        pcbuild_proj,
-        b'<Projects Include="pylauncher.vcxproj;pywlauncher.vcxproj" />',
-        b"",
-    )
-    static_replace_in_file(
-        pcbuild_proj, b'<Projects Include="pyshellext.vcxproj" />', b""
-    )
+    # The legacy launcher and shell extension are only present through Python 3.15.
+    # https://github.com/python/cpython/pull/153512
+    if meets_python_maximum_version(python_version, "3.15"):
+        static_replace_in_file(
+            pcbuild_proj,
+            b'<Projects Include="pylauncher.vcxproj;pywlauncher.vcxproj" />',
+            b"",
+        )
+        static_replace_in_file(
+            pcbuild_proj, b'<Projects Include="pyshellext.vcxproj" />', b""
+        )
 
     # Ditto for freeze_importlib, which isn't needed since we don't modify
     # the frozen importlib baked into the source distribution (
@@ -811,7 +814,7 @@ def run_msbuild(
     # See https://learn.microsoft.com/en-us/cpp/cpp/attributes#msvcmusttail
     # and https://github.com/python/cpython/issues/148047
     if (
-        python_version.startswith("3.15")
+        meets_python_minimum_version(python_version, "3.15")
         and platform == "x64"
         and configuration != "Debug"
     ):
@@ -2031,6 +2034,7 @@ def main() -> None:
             "cpython-3.13",
             "cpython-3.14",
             "cpython-3.15",
+            "cpython-3.16",
         },
         default="cpython-3.11",
         help="Python distribution to build",

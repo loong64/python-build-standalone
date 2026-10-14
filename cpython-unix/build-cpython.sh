@@ -314,26 +314,34 @@ fi
 
 # Ensure the new build-details.json file reports relocatable paths.
 # There is not yet a flag in ./configure for this, sadly.
-if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_14}" ]; then
+if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_16}" ]; then
+    patch -p1 -i "${ROOT}/patch-python-relative-build-details-3.16.patch"
+elif [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_14}" ]; then
     patch -p1 -i "${ROOT}/patch-python-relative-build-details.patch"
 fi
 
 # Mark _Py_jit_entry as extern in _testiternalcapi/interpreter.c to avoid a duplicate symbols.
 # The symbol is not actually used in the module, a better solution should be found, see:
 # https://github.com/python/cpython/issues/144712
-if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_15}" ]; then
+# The unused definition was removed in 3.16.
+if [ "${PYTHON_MAJMIN_VERSION}" = "3.15" ]; then
     patch -p1 -i "${ROOT}/patch-testinternalcapi-interpreter-extern.patch"
 fi
 
 # CPython uses HAVE_GETRANDOM_SYSCALL to decide whether to include
 # <sys/syscall.h>, but other APIs independently depend on __NR_* definitions
 # from that header. Include it whenever configure finds the header.
-patch -p1 -i "${ROOT}/patch-posixmodule-sys-syscall-header.patch"
+# Upstreamed in 3.16+
+# https://github.com/python/cpython/pull/155762
+if [ -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_15}" ]; then
+    patch -p1 -i "${ROOT}/patch-posixmodule-sys-syscall-header.patch"
+fi
 
 # Older glibc headers do not define SYS_getrandom even when the modern UAPI
 # headers provide __NR_getrandom. Use the UAPI syscall number directly so
 # CPython can compile os.getrandom without raising the minimum glibc version.
-if [[ -n "${LINUX_UAPI_INCLUDE_ARCH:-}" ]]; then
+# CPython 3.16 falls back to __NR_getrandom itself.
+if [[ -n "${LINUX_UAPI_INCLUDE_ARCH:-}" && -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_15}" ]]; then
     if [[ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_15}" ]]; then
         patch -p1 -i "${ROOT}/patch-getrandom-use-nr-3.15.patch"
     elif [[ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]]; then
@@ -348,8 +356,16 @@ fi
 # built against lacks them, which loses them for good in builds targeting an
 # older glibc. Call the raw syscalls when the wrappers are missing so both
 # functions keep working on any kernel that implements them.
-# Backport of https://github.com/python/cpython/pull/155520.
-patch -p1 -i "${ROOT}/patch-posixmodule-syscall-fallback.patch"
+# Backport of https://github.com/python/cpython/pull/155520, included in 3.16.
+if [ -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_15}" ]; then
+    patch -p1 -i "${ROOT}/patch-posixmodule-syscall-fallback.patch"
+fi
+
+# musl aliases getdents64 to getdents, which expects a struct dirent pointer.
+# Passing the buffer as void * is compatible with both libc signatures.
+if [[ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_16}" && "${TARGET_TRIPLE}" == *-linux-musl ]]; then
+    patch -p1 -i "${ROOT}/patch-posixsubprocess-musl-getdents64.patch"
+fi
 
 # Most bits look at CFLAGS. But setup.py only looks at CPPFLAGS.
 # So we need to set both.
@@ -388,6 +404,9 @@ fi
 if [[ "${PYBUILD_PLATFORM}" != macos* ]]; then
     # Add configure flag for proper configure support for libedit.
     EXTRA_CONFIGURE_FLAGS="${EXTRA_CONFIGURE_FLAGS} --with-readline=editline"
+elif [[ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_16}" ]]; then
+    # Recent SDKs expose has_mouse, but macOS 11's libncurses does not.
+    EXTRA_CONFIGURE_FLAGS="${EXTRA_CONFIGURE_FLAGS} ac_cv_lib_curses_has_mouse=no"
 fi
 
 # On Python 3.14+, enable the tail calling interpreter which is more performant.
@@ -422,9 +441,13 @@ CONFIGURE_FLAGS="
     --prefix=/install
     --with-openssl=${TOOLS_PATH}/deps
     --with-system-expat
-    --with-system-libmpdec
     --without-ensurepip
     ${EXTRA_CONFIGURE_FLAGS}"
+
+# CPython 3.16 always uses the system libmpdec.
+if [ -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_15}" ]; then
+    CONFIGURE_FLAGS="${CONFIGURE_FLAGS} --with-system-libmpdec"
+fi
 
 if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_12}" ]; then
     # Build standard-library extensions as built-ins by default. Setup.local
@@ -789,7 +812,7 @@ fi
 
 # TODO: Remove when RISC-V cross-builds use LLVM/lld.
 # Binutils 2.31 can incorrectly relax RISC-V calls with libffi 3.8.0.
-if [[ "${TARGET_TRIPLE}" == "riscv64-unknown-linux-gnu" && "${PYTHON_MAJMIN_VERSION}" == "3.15" ]]; then
+if [[ "${TARGET_TRIPLE}" == "riscv64-unknown-linux-gnu" && -n "${PYTHON_MEETS_MINIMUM_VERSION_3_15}" ]]; then
     export LDFLAGS_NODIST="${LDFLAGS_NODIST:+${LDFLAGS_NODIST} }-Wl,--no-relax"
 fi
 
