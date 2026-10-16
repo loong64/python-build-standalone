@@ -34,18 +34,6 @@
         ],
         "license_file": "LICENSE.bzip2.txt"
     },
-    "cpython-3.10": {
-        "url": "https://www.python.org/ftp/python/3.10.22/Python-3.10.22.tar.xz",
-        "size": 19907500,
-        "sha256": "c61fe9b1a1a7ec2a0b0388e664187c378a5325a89e3606d220abf5bdfccb2543",
-        "version": "3.10.22",
-        "licenses": [
-            "Python-2.0",
-            "CNRI-Python"
-        ],
-        "license_file": "LICENSE.cpython.txt",
-        "python_tag": "cp310"
-    },
     "cpython-3.11": {
         "url": "https://www.python.org/ftp/python/3.11.17/Python-3.11.17.tar.xz",
         "size": 20352864,
@@ -286,21 +274,6 @@
             "X11"
         ],
         "license_file": "LICENSE.ncurses.txt"
-    },
-    "openssl-1.1": {
-        "_comment": "Remember to update OPENSSL_VERSION_INFO in pythonbuild/disttests/ whenever upgrading.",
-        "url": "https://www.openssl.org/source/openssl-1.1.1w.tar.gz",
-        "size": 9893384,
-        "sha256": "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8",
-        "version": "1.1.1w",
-        "library_names": [
-            "crypto",
-            "ssl"
-        ],
-        "licenses": [
-            "OpenSSL"
-        ],
-        "license_file": "LICENSE.openssl-1.1.txt"
     },
     "openssl-3.5": {
         "_comment": "Remember to update OPENSSL_VERSION_INFO in pythonbuild/disttests/ whenever upgrading.",

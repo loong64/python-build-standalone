@@ -376,21 +376,6 @@ def apply_source_patch(cpython_source_path: pathlib.Path, patch_path: pathlib.Pa
         normalized_patch.unlink()
 
 
-OPENSSL_PROPS_REMOVE_RULES_LEGACY = rb"""
-  <ItemGroup>
-    <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).dll" />
-    <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).pdb" />
-    <_SSLDLL Include="$(opensslOutDir)\libssl$(_DLLSuffix).dll" />
-    <_SSLDLL Include="$(opensslOutDir)\libssl$(_DLLSuffix).pdb" />
-  </ItemGroup>
-  <Target Name="_CopySSLDLL" Inputs="@(_SSLDLL)" Outputs="@(_SSLDLL->'$(OutDir)%(Filename)%(Extension)')" AfterTargets="Build">
-    <Copy SourceFiles="@(_SSLDLL)" DestinationFolder="$(OutDir)" />
-  </Target>
-  <Target Name="_CleanSSLDLL" BeforeTargets="Clean">
-    <Delete Files="@(_SSLDLL->'$(OutDir)%(Filename)%(Extension)')" TreatErrorsAsWarnings="true" />
-  </Target>
-"""
-
 OPENSSL_PROPS_REMOVE_RULES = rb"""
   <ItemGroup>
     <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).dll" />
@@ -533,36 +518,11 @@ def hack_props(
     else:
         raise Exception(f"unhandled architecture: {arch}")
 
-    try:
-        # CPython 3.11+ builds with OpenSSL 3.x by default.
-        static_replace_in_file(
-            openssl_props,
-            b"<_DLLSuffix>-3</_DLLSuffix>",
-            b"<_DLLSuffix>-3%s</_DLLSuffix>" % suffix,
-        )
-    except NoSearchStringError:
-        static_replace_in_file(
-            openssl_props,
-            b"<_DLLSuffix>-1_1</_DLLSuffix>",
-            b"<_DLLSuffix>-1_1%s</_DLLSuffix>" % suffix,
-        )
-
-    libffi_props = pcbuild_path / "libffi.props"
-
-    # Always use libffi-8 / 3.4.2. (Python < 3.11 use libffi-7 by default.)
-    try:
-        static_replace_in_file(
-            libffi_props,
-            rb"""<_LIBFFIDLL Include="$(libffiOutDir)\libffi-7.dll" />""",
-            rb"""<_LIBFFIDLL Include="$(libffiOutDir)\libffi-8.dll" />""",
-        )
-        static_replace_in_file(
-            libffi_props,
-            rb"<AdditionalDependencies>libffi-7.lib;%(AdditionalDependencies)</AdditionalDependencies>",
-            rb"<AdditionalDependencies>libffi-8.lib;%(AdditionalDependencies)</AdditionalDependencies>",
-        )
-    except NoSearchStringError:
-        pass
+    static_replace_in_file(
+        openssl_props,
+        b"<_DLLSuffix>-3</_DLLSuffix>",
+        b"<_DLLSuffix>-3%s</_DLLSuffix>" % suffix,
+    )
 
 
 def hack_project_files(
@@ -701,7 +661,7 @@ def hack_project_files(
         pass
 
     # Our logic for rewriting extension projects gets confused by _sqlite.vcxproj not
-    # having a `<PreprocessorDefinitions>` line in 3.10+. So adjust that.
+    # having a `<PreprocessorDefinitions>` line. So adjust that.
     try:
         static_replace_in_file(
             pcbuild_path / "_sqlite3.vcxproj",
@@ -2028,7 +1988,6 @@ def main() -> None:
     parser.add_argument(
         "--python",
         choices={
-            "cpython-3.10",
             "cpython-3.11",
             "cpython-3.12",
             "cpython-3.13",
@@ -2083,15 +2042,8 @@ def main() -> None:
 
         # TODO need better dependency checking.
 
-        # CPython 3.11+ have native support for OpenSSL 3.x. We anticipate this
-        # will change in a future minor release once OpenSSL 1.1 goes out of support.
-        # But who knows.
-        if args.python == "cpython-3.10":
-            openssl_entry = "openssl-1.1"
-        else:
-            openssl_entry = "openssl-3.5"
-
-        openssl_with_uplink = args.python in ["cpython-3.10", "cpython-3.11"]
+        openssl_entry = "openssl-3.5"
+        openssl_with_uplink = args.python == "cpython-3.11"
         if openssl_with_uplink:
             openssl_build_options = f"{build_options}-uplink"
         else:
@@ -2142,7 +2094,7 @@ def main() -> None:
         else:
             release_tag = release_tag_from_git()
 
-        # Create, e.g., `cpython-3.10.13+20240224-x86_64-pc-windows-msvc-pgo.tar.zst`.
+        # Create, e.g., `cpython-3.11.9+20240224-x86_64-pc-windows-msvc-pgo.tar.zst`.
         DIST.mkdir(exist_ok=True)
         compress_python_archive(
             tar_path,
