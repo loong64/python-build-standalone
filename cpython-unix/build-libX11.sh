@@ -33,15 +33,6 @@ if [ -n "${CROSS_COMPILING}" ]; then
     loongarch64-unknown-linux-gnu)
       EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
       ;;
-    mips-unknown-linux-gnu)
-      EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
-      ;;
-    mipsel-unknown-linux-gnu)
-      EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
-      ;;
-    mips64el-unknown-linux-gnuabi64)
-      EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
-      ;;
     ppc64le-unknown-linux-gnu)
       EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
       ;;
@@ -58,12 +49,6 @@ if [ -n "${CROSS_COMPILING}" ]; then
       EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
       ;;
     loongarch64-unknown-linux-musl)
-      EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
-      ;;
-    mips-unknown-linux-musl)
-      EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
-      ;;
-    mipsel-unknown-linux-musl)
       EXTRA_FLAGS="${EXTRA_FLAGS} --enable-malloc0returnsnull"
       ;;
     ppc64le-unknown-linux-musl)
@@ -100,7 +85,7 @@ LIBTOOL_CC="${CC}"
 read -r -a TARGET_LDFLAGS <<< "${EXTRA_TARGET_LDFLAGS}"
 for flag in "${TARGET_LDFLAGS[@]}"; do
   case "${flag}" in
-    --target=*|--sysroot=*|--gcc-install-dir=*) LIBTOOL_CC="${LIBTOOL_CC} ${flag}" ;;
+    --target=*|--sysroot=*|--gcc-install-dir=*|-mfloat-abi=*|-mfpu=*) LIBTOOL_CC="${LIBTOOL_CC} ${flag}" ;;
   esac
 done
 RAWCPP="$(command -v "${CC}") -E -"
