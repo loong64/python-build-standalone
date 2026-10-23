@@ -313,6 +313,20 @@ fi
 CFLAGS="${EXTRA_TARGET_CFLAGS} -fPIC -I${TOOLS_PATH}/deps/include -I${TOOLS_PATH}/deps/include/ncursesw"
 LDFLAGS="${EXTRA_TARGET_LDFLAGS} -L${TOOLS_PATH}/deps/lib"
 
+# Python 3.16+ can require half-float helpers with newer libgcc_s symbol versions.
+# Request these helpers explicitly so the linker pulls them from libgcc.a.
+LDFLAGS_NODIST=""
+if [[ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_16}" ]]; then
+    case "${TARGET_TRIPLE}" in
+        aarch64-unknown-linux-gnu)
+            LDFLAGS_NODIST="-Wl,-u,__extendhftf2"
+            ;;
+        x86_64-unknown-linux-gnu)
+            LDFLAGS_NODIST="-Wl,-u,__extendhfsf2 -Wl,-u,__extendhfxf2 -Wl,-u,__truncdfhf2"
+            ;;
+    esac
+fi
+
 if [[ -n "${LINUX_UAPI_INCLUDE_ARCH:-}" ]]; then
     if [[ ! -d "${TOOLS_PATH}/deps/linux-uapi/usr/include/${LINUX_UAPI_INCLUDE_ARCH}" ]]; then
         echo "missing linux-uapi package for ${LINUX_UAPI_INCLUDE_ARCH}"
@@ -754,6 +768,7 @@ fi
 
 BOLT_COMMON_FLAGS="${BOLT_COMMON_FLAGS:-}" BOLT_APPLY_FLAGS="${BOLT_APPLY_FLAGS:-}" \
     CFLAGS=$CFLAGS CPPFLAGS=$CFLAGS CFLAGS_JIT=$CFLAGS_JIT LDFLAGS=$LDFLAGS \
+    LDFLAGS_NODIST="${LDFLAGS_NODIST}" \
     ./configure ${CONFIGURE_FLAGS}
 
 # Supplement produced Makefile with our modifications.
