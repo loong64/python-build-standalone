@@ -80,14 +80,16 @@ HOST_PYTHON_DEPENDS := $(OUTDIR)/cpython-$(PYTHON_MAJOR_VERSION)-$(CPYTHON_$(PYT
 default: $(OUTDIR)/cpython-$(CPYTHON_$(PYTHON_MAJOR_VERSION)_VERSION)-$(PACKAGE_SUFFIX).tar
 
 ifndef PYBUILD_NO_DOCKER
-$(OUTDIR)/image-%.$(HOST_PLATFORM).tar: $(OUTDIR)/%.Dockerfile
+$(OUTDIR)/image-%.$(HOST_PLATFORM).tar: $(OUTDIR)/%.Dockerfile $(HERE)/%.Dockerfile
 	$(RUN_BUILD) --toolchain image-$*
 endif
 
 $(OUTDIR)/$(CLANG_FILENAME):
 	$(RUN_BUILD) --toolchain clang --target-triple $(TARGET_TRIPLE)
 
-$(OUTDIR)/$(MUSL_TOOLCHAIN_NAME)-$(MUSL_TOOLCHAIN_VERSION)-$(HOST_PLATFORM).tar: $(BASE_TOOLCHAIN_DEPENDS) $(HERE)/build-musl.sh
+$(OUTDIR)/$(MUSL_TOOLCHAIN_NAME)-$(MUSL_TOOLCHAIN_VERSION)-$(HOST_PLATFORM).tar: $(BASE_TOOLCHAIN_DEPENDS) \
+    $(HERE)/build-musl.sh \
+    $(if $(PYBUILD_NO_DOCKER),,$(OUTDIR)/image-$(DOCKER_IMAGE_GCC).$(HOST_PLATFORM).tar)
 	$(RUN_BUILD) --toolchain musl --docker-image $(DOCKER_IMAGE_GCC)
 
 ifeq ($(HOST_PLATFORM),linux_x86_64)
@@ -100,7 +102,7 @@ empty:
 
 toolchain: $(TOOLCHAIN_TARGET)
 
-toolchain-image-%: $(OUTDIR)/%.Dockerfile
+toolchain-image-%: $(OUTDIR)/%.Dockerfile $(HERE)/%.Dockerfile
 	$(RUN_BUILD) --toolchain image-$*
 
 AUTOCONF_DEPENDS = \
