@@ -152,9 +152,11 @@ fi
 
 # The default build rule for the macOS dylib doesn't pick up libraries
 # from modules / makesetup. So patch it accordingly.
-if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]; then
+# Python 3.14.10+ and 3.15.2+ include this patch, but the 3.16.0a1
+# source predates the upstream fix. Revisit when updating 3.16.
+if [ "${PYTHON_MAJMIN_VERSION}" = "3.13" ] || [ "${PYTHON_MAJMIN_VERSION}" = "3.16" ]; then
     patch -p1 -i "${ROOT}/patch-macos-link-extension-modules-13.patch"
-else
+elif [ -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_12}" ]; then
     patch -p1 -i "${ROOT}/patch-macos-link-extension-modules.patch"
 fi
 
